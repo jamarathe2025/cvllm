@@ -1,0 +1,30 @@
+John Doe
+Email: john.doe@example.com | Phone: +1-555-123-4567 | Location: Bengaluru, IN
+LinkedIn: https://linkedin.com/in/johndoe | GitHub: https://github.com/johndoe
+
+Summary
+Machine Learning Engineer with 4+ years of experience building NLP systems, deploying models to production, and collaborating cross-functionally. Passionate about LLMs, RAG, and applied AI with measurable impact.
+
+Skills
+Python, PyTorch, TensorFlow, scikit-learn, NLP, Transformers, LLMs, RAG, LangChain, LlamaIndex, Docker, REST APIs, CI/CD, Git, SQL
+
+Experience
+Machine Learning Engineer | Acme AI | 2022-01 to Present
+- Built text classification pipeline (RoBERTa) improving F1 from 0.74 to 0.86 on customer intents (20% lift in automation rate)
+- Deployed inference service on Docker + FastAPI handling 50 RPS avg with autoscaling
+- Implemented prompt-engineering and RAG prototype with LangChain, cutting support resolution time by 18%
+
+Data Scientist | DataWorks | 2020-06 to 2021-12
+- Developed NER models for policy extraction using spaCy and Transformers (F1 0.89)
+- Collaborated with backend team to integrate models via REST; added monitoring dashboards for drift and latency
+
+Projects
+LLM-Powered FAQ Assistant
+- Built RAG pipeline with vector search (FAISS) and LlamaIndex; reduced time-to-answer by 40%
+- Technologies: Python, LangChain, LlamaIndex, Open-source LLMs
+
+Education
+B.Tech in Computer Science, IIT Example | 2016 - 2020 | GPA: 8.7/10
+
+Certifications
+AWS Certified Machine Learning – Specialty

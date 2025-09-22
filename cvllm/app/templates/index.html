@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CV Sorting using LLMs</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>CV Sorting using LLMs</h1>
+    <p>Upload multiple resumes and a Job Description (JD) to get a ranked list of candidates.</p>
+
+    {% if error %}
+      <div class="alert">{{ error }}</div>
+    {% endif %}
+
+    <form class="card" action="/rank" method="post" enctype="multipart/form-data">
+      <div class="field">
+        <label>Resumes (PDF/DOCX/TXT)</label>
+        <input type="file" name="resumes" multiple required accept=".pdf,.docx,.txt" />
+        <small>You can select multiple files.</small>
+      </div>
+
+      <div class="field">
+        <label>Job Description (paste text)</label>
+        <textarea name="jd_text" rows="6" placeholder="Paste JD text here..."></textarea>
+        <small>Alternatively upload a JD text file below.</small>
+      </div>
+
+      <div class="field">
+        <label>Job Description file (TXT)</label>
+        <input type="file" name="jd_file" accept=".txt" />
+      </div>
+
+      <div class="field">
+        <label>Model (optional)</label>
+        <input type="text" name="model" placeholder="e.g., gemma:2b, llama3.1:8b" />
+      </div>
+
+      <div class="field">
+        <label>Scoring Engine</label>
+        <select name="engine">
+          <option value="heuristic" {% if engine == 'heuristic' or not engine %}selected{% endif %}>Heuristic (keyword-based)</option>
+          <option value="resume_matcher" {% if engine == 'resume_matcher' %}selected{% endif %}>Resume Matcher (LLM rubric)</option>
+          <option value="lindex" {% if engine == 'lindex' %}selected{% endif %}>LlamaIndex (semantic)</option>
+          <option value="langchain" {% if engine == 'langchain' %}selected{% endif %}>LangChain (LLM rubric + structured parsing)</option>
+        </select>
+        <small>Heuristic is fastest; Resume Matcher/LangChain provide LLM rubric scoring; LlamaIndex does semantic retrieval.</small>
+      </div>
+
+      <div class="card" style="margin-top:12px;">
+        <h3 style="margin-top:0;">Filters</h3>
+        <div class="field">
+          <label>Required Skills (comma-separated)</label>
+          <input type="text" name="required_skills" value="{{ required_skills or '' }}" placeholder="e.g., Python, SQL, FastAPI" />
+        </div>
+        <div class="field">
+          <label>Minimum Alignment Score (0..1)</label>
+          <input type="number" step="0.01" min="0" max="1" name="min_alignment" value="{{ min_alignment or 0 }}" />
+        </div>
+        <div class="field">
+          <label>Top-N Results</label>
+          <input type="number" min="0" name="top_n" value="{{ top_n or 0 }}" />
+          <small>0 = show all</small>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button type="submit">Rank Candidates</button>
+      </div>
+    </form>
+
+    {% if results %}
+      <div class="results">
+        <h2>Ranking Results</h2>
+        {% if engine %}
+          <p><strong>Engine:</strong> {{ engine }}</p>
+        {% endif %}
+        {% if saved_json_name %}
+          <p>
+            <a class="button" href="/download/json/{{ saved_json_name }}">Download detailed JSON</a>
+          </p>
+        {% endif %}
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Name</th>
+                <th>Resume Path</th>
+                <th>Alignment</th>
+                <th>Coverage</th>
+                <th>Details</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for c in results.candidates %}
+              <tr>
+                <td>#{{ c.rank }}</td>
+                <td>{{ c.name or 'Unknown' }}</td>
+                <td title="{{ c.resume_path }}">{{ c.resume_path }}</td>
+                <td>{{ '%.3f'|format(c.alignment_score) }}</td>
+                <td>{{ '%.3f'|format(c.keyword_coverage) }}</td>
+                <td>
+                  {% if c.overall_explanation or (c.per_requirement and c.per_requirement|length > 0) %}
+                  <details>
+                    <summary>View</summary>
+                    {% if c.overall_explanation %}
+                      <p><strong>Overall:</strong> {{ c.overall_explanation }}</p>
+                    {% endif %}
+                    {% if c.per_requirement and c.per_requirement|length > 0 %}
+                      <div class="table-wrap mini">
+                        <table>
+                          <thead>
+                            <tr>
+                              <th style="width:55%">Requirement</th>
+                              <th style="width:15%">Score</th>
+                              <th>Explanation</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {% for pr in c.per_requirement %}
+                              <tr>
+                                <td>{{ pr.requirement }}</td>
+                                <td>{{ '%.2f'|format(pr.score) }}</td>
+                                <td>{{ pr.explanation or '' }}</td>
+                              </tr>
+                            {% endfor %}
+                          </tbody>
+                        </table>
+                      </div>
+                    {% endif %}
+                  </details>
+                  {% else %}
+                    —
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <form action="/download/csv" method="post">
+          {% for c in results.candidates %}
+            <input type="hidden" name="resumes" value="{{ c.resume_path }}" />
+            <input type="hidden" name="ranks" value="{{ c.rank }}" />
+            <input type="hidden" name="names" value="{{ c.name or '' }}" />
+            <input type="hidden" name="aligns" value="{{ c.alignment_score }}" />
+            <input type="hidden" name="covers" value="{{ c.keyword_coverage }}" />
+          {% endfor %}
+          <button type="submit">Download CSV</button>
+        </form>
+      </div>
+    {% endif %}
+
+    <footer>
+      <p>Runs locally with Ollama. Keep your PII safe.</p>
+    </footer>
+  </div>
+</body>
+</html>

@@ -1,0 +1,13 @@
+We are seeking a Machine Learning Engineer to build and deploy NLP systems.
+Responsibilities:
+- Design, train, and evaluate models for text classification and information extraction
+- Collaborate with product and data teams to define ML requirements
+- Deploy services to production and monitor performance
+Requirements:
+- 3+ years with Python and ML frameworks (PyTorch/TensorFlow)
+- Experience with NLP, vector databases, and prompt engineering
+- Strong software engineering skills (Git, CI/CD, APIs)
+Nice to have:
+- Experience with LLMs, RAG, and LangChain/LlamaIndex
+- Cloud experience (AWS/GCP/Azure)
+Keywords: Python, NLP, LLM, RAG, LangChain, PyTorch, Docker, REST, CI/CD
